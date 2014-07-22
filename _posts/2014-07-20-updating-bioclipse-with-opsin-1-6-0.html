@@ -1,0 +1,36 @@
+---
+post_title: Updating Bioclipse with OPSIN 1.6.0
+author: Egon Willighagen
+post_excerpt: ""
+layout: post
+permalink: >
+  /2014/07/20/updating-bioclipse-with-opsin-1-6-0/
+---
+<strong>Hypothesis</strong>: Bioclipse works just as well with OPSIN 1.6.0 as it does with 1.5.0.
+
+<strong>Start date</strong>: 2014-07-20 <strong>End data</strong>: 2014-07-21
+
+<strong>Description</strong>: Bioclipse in the development branch has OPSIN 1.5.0 exposed with the <em>opsin</em> manager. The intention of this experiment is to update Bioclipse with OPSIN 1.6.0, keeping the <em>opsin</em> manager methods working.
+
+<strong>Methods</strong>
+<ul>
+	<li>start with a Eclipse development environment including the <a href="https://github.com/bioclipse/bioclipse.cheminformatics">bioclipse.cheminformatics</a> repository</li>
+	<li>update the OPSIN version</li>
+	<li>test with the test suite</li>
+	<li>publish the patches</li>
+</ul>
+<strong>Report</strong>
+
+I still had a working development environment around. As I installed Eclipse 4.4 a few days earlier, I opened the Eclipse workspace with this version, which triggered an irreversible upgrade of the workspace so that I cannot return to Eclipse 4.3. The test suite was run as "JUnit Plug-in Test" using Eclipse, defined by the <em>AllOpsinManagerPluginTests</em> class. This shows two fails in the <em>APITest</em> test class, related to <em>@TestClass</em> and <em>@TestMethod</em> annotation. Annotation was added and committed as a patch to ensure no fails were reported.
+
+Then the opsin-1.6.0-excludingInChI-jar-with-dependencies.jar was downloaded from <a href="https://bitbucket.org/dan2097/opsin/downloads">the OPSIN download page</a>. This version was selected because the 1.5.0 version excluded the InChI bits too and these is already available from other Bioclipse plugins. The new jar was copied into the net.bioclipse.opsin's jar/ folder and .classpatch, MANIFEST.MF, and build.properties were updated accordingly.
+
+The result was successfully testing using the aforementioned <em>AllOpsinManagerPluginTests</em> class and by running Bioclipse itself and using the <em>opsin</em> manager from the JavaScript console with the command <em>ui.open(opsin.parseIUPACName("benzene"))</em>.
+
+The two patches were made available as <a href="https://github.com/bioclipse/bioclipse.cheminformatics/pull/46">pull request 46</a>.
+
+<a href="http://onsnetwork.org/chemblaics/files/bcOpsin1.6.png"><img class="alignnone size-medium wp-image-21" src="http://onsnetwork.org/chemblaics/files/bcOpsin1.6-300x274.png" alt="Bioclipse with OPSIN 1.6.0" width="300" height="274" /></a>
+
+<strong>Conclusion</strong>:
+
+No special updated were needed and Bioclipse works with OPSIN 1.6.0 just as it did with OPSIN 1.5.0.
