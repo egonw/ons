@@ -1,0 +1,52 @@
+---
+post_title: >
+  Validating and Reviewing proprietary RDF
+  for Open PHACTS
+author: Egon Willighagen
+post_excerpt: ""
+layout: post
+permalink: >
+  /2014/07/23/validating-and-reviewing-proprietary-rdf-for-open-phacts/
+---
+<strong>Hypothesis</strong>: The proprietary RDF is valid and uses common ontologies
+
+<strong>Start date</strong>:  2014-07-23 <strong>End date</strong>: 2014-07-23
+
+<strong>Description:</strong>
+
+For obvious reasons, this experiment will not disclose all details. It will outline, however, the steps I undertook to do the validation and evaluation.
+
+<strong>Methods</strong>:
+<ul>
+	<li>determine format</li>
+	<li>validate basic syntax</li>
+	<li>test reading and conversion</li>
+	<li>inspect triple structure</li>
+	<li>inspect all used ontologies</li>
+	<li>match results against Open PHACTS habits</li>
+</ul>
+<strong>Report</strong>:
+
+The provided RDF document is in the RDF/XML format. It validates as well-formed XML, with xmllint (Debian:<a href="https://packages.debian.org/libxml2-utils">libxml2-utils</a>):
+
+<code>xmllint --noout file.rdf</code>
+
+The document is not linked to a DTD or XML Schema (as is common with RDF/XML). Parsing the library with rapper (Debian:<a href="https://packages.debian.org/raptor2-utils">raptor2-utils</a>) does not find problems either:
+
+<code>cat file.rdf | rapper -t -q - . &gt; /dev/null</code>
+
+Using the --count option, 72 triples are found in the sample RDF. The RDF was converted into Turtle with:
+
+<code>rapper -o turtle file.rdf &gt; file.ttl</code>
+
+This resulted in a file with 101 lines.
+
+Manual inspection of the Turtle file shows that it has nine resources of five different types. Resources are not formally types using <em>rdf:type</em>, but the type is clear from the resource IRI. Most properties are provided as literals, including identifiers. The latter could use identifiers.org style identifiers, or RDF IRIs provided by upstream databases. The structure looks reasonable, with one type at the center, pointing to the four other types with four different predicates.
+
+The document uses mostly a custom, undocumented ontology, where term IRIs have human readable forms. Common ontologies used include Dublin Core, and BIBO. Ontologies are looked up at the BioPortal project page (http://bioportal.bioontology.org/projects/Open_PHACTS); the BioAssay Ontology, ChEBI, and QUDT ontologies, as found there, are not used.
+
+The expected VoID descriptions with provenance information is missing (see the <a href="http://www.openphacts.org/specs/datadesc/">Dataset Descriptions for the Open Pharmacological Space</a> specification).
+
+<strong>Conclusion</strong>:
+
+The RDF is in a decent shape: it is valid and is human readable. It should, however, make more use of ontologies already in practice. Importantly, the data should be complemented with VoID descriptions.
