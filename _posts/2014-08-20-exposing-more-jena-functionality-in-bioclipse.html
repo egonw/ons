@@ -1,0 +1,91 @@
+---
+post_title: >
+  Exposing more Jena functionality in
+  Bioclipse
+author: Egon Willighagen
+post_excerpt: ""
+layout: post
+permalink: >
+  /2014/08/20/exposing-more-jena-functionality-in-bioclipse/
+---
+<strong>Hypothesis</strong>: Jena functionality for triple set comparison can be exposed via Bioclipse script
+
+<strong>Start date</strong>: 2014-08-20 <strong>End date</strong>: 2014-08-20
+
+<strong>Description</strong>: <a href="http://www.bioclipse.net">Bioclipse</a> in the development branch mostly uses <a href="https://jena.apache.org/">Jena</a> for handling RDF data. The "rdf" manager already exposes various features of Jena. We here wish to expose the functionality of Jena to make unions, intersections, and differences of two triple stores ("Model"s in Jena terms) and to use the experimental shortest path method from the OntTool class.
+
+<strong>Methods</strong>
+<ul>
+	<li>start with a Eclipse development environment including the <a href="https://github.com/bioclipse/bioclipse.cheminformatics">bioclipse.cheminformatics</a> repository</li>
+	<li>define additional methods in the IRDFManager interface with the proper code</li>
+	<li>write implementations of these methods in the RDFManager class</li>
+	<li>publish the patches</li>
+</ul>
+<strong>Report </strong>While I still had a development environment from <a href="http://onsnetwork.org/chemblaics/2014/07/20/updating-bioclipse-with-opsin-1-6-0/">this step</a>, Bioclipse no longer properly booted. Between that experiment and this one various things happened:
+<ol>
+	<li>Bioclipse had a new target platform</li>
+	<li>I moved to a 64bit operating system</li>
+	<li>I only reinstalled Java8</li>
+</ol>
+For resetting the target platform the normal protocol was used, though I had to repeat it a few times to get fully working. As usual, I first had to ask Arvid in Uppsala before it really started working (#overlyhonestmethods). There may have been a confounding issue with not having the proper javax.xml.soap version in my installation, and Arvid's suggestion to manually remove the java.xml plugin from the target platform, via the Content tab.
+
+A further issue was found in using Java8 which has a different provider for the JavaScript extension. As a result, the Bioclipse JavaScript console did not start. Apparently, my Java 8_11 installation in Eclipse does not provide any scripting environment (tested by asking the ScriptEngineManager for all engines; none were reported). Because the nashorn.jar that contains the implementation was provided by Oracle as a separate jar, containing an open source JavaScript engine originally by Mozilla, now provided via OpenJDK, I could include this jar in the Bioclipse plugin, solving these issues. Along with a few other patches, these tweaks are available in <a href="https://github.com/egonw/bioclipse.core/commits/feature/nashorn">this branch on GitHub</a>. These patches are not pushed for inclusion in the Bioclipse development branch.
+
+The test suite was not extended and not run as "JUnit Plug-in Test" using Eclipse, because my development environment is not able to properly run these at this moment. Instead, the functionality was tested using the <em>rdf</em> manager from the JavaScript console with this script:
+
+<code>store = rdf.createInMemoryStore()</code>
+
+<code>rdf.addObjectProperty(store,</code>
+<code>  "http://example.com/#subject",</code>
+<code>  "http://example.com/#predicate",</code>
+<code>  "http://example.com/#object"</code>
+<code>);</code>
+<code>rdf.addObjectProperty(store,</code>
+<code>  "http://example.com/#subject",</code>
+<code>  "http://example.com/#predicate",</code>
+<code>  "http://example.com/#object2"</code>
+<code>);</code>
+<code>secondStore = rdf.createInMemoryStore();</code>
+<code>rdf.addObjectProperty(secondStore,</code>
+<code>  "http://example.com/#subject",</code>
+<code>  "http://example.com/#predicate",</code>
+<code>  "http://example.com/#object"</code>
+<code>);</code>
+<code>rdf.addDataProperty(secondStore,</code>
+<code>  "http://example.com/#subject",</code>
+<code>  "http://example.com/#predicate",</code>
+<code>  "someDataObject"</code>
+<code>);</code>
+
+<code>unionStore = rdf.union(store, secondStore);</code>
+<code>diffStore = rdf.difference(store, secondStore);</code>
+<code>intersectStore = rdf.intersection(store, secondStore);</code>
+<code>rdf.asTurtle(diffStore)</code>
+
+This showed expected results, with the exception that the Jena code makes default triples more visible. That is, converting the <em>store</em> to Turtle shows two triples, even though it has an additional 39~ish additional triples from the RDF and RDF Schema specifications. Weirdly, making a union of the <em>store</em> and <em>secondStore</em>, the number of triples increases to about 150 and converting this to Turtle does serialize all those RDF and RDF Schema triples. I have been unable to work around this feature.
+
+The above three methods are easily wrapped, but the shortest path functionality requires an additional step: the OntTool return value is a toolkit specific type (<em>Path</em>) and the <em>rdf</em> manager was designed to convert this to a <em>java.util.List</em> of <em>String</em>s. This functionality too was tested via the <em>JavaScriptConsole</em>:
+
+<code>store = rdf.createInMemoryStore()</code>
+
+<code>rdf.addObjectProperty(store,</code>
+<code>  "http://example.com/#subject",</code>
+<code>  "http://example.com/#predicate",</code>
+<code>  "http://example.com/#subject2"</code>
+<code>);</code>
+<code>rdf.addObjectProperty(store,</code>
+<code>  "http://example.com/#subject2",</code>
+<code>  "http://example.com/#predicate",</code>
+<code>  "http://example.com/#subject3"</code>
+<code>);</code>
+
+<code>rdf.shortestPath(store,</code>
+<code>  "http://example.com/#subject",</code>
+<code>  "http://example.com/#subject3"</code>
+<code>);</code>
+
+The manager provides two variants at this moment of this shortestPath() method: the above exemplified version and one that takes a fourth parameter, being a String representation of an URI matching the only predicate that can be part of the path. Both methods were found to work as expected based on the above code. No application to larger data sets have been tried.
+
+Resulting patches have been provided as <a href="https://github.com/bioclipse/bioclipse.rdf/pull/5">a pull request</a>.
+
+<strong>Conclusion</strong>: Exposing the additional functionality yielded an more functional rdf manager with interesting new features.
