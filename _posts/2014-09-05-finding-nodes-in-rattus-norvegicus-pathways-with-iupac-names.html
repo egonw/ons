@@ -1,0 +1,35 @@
+---
+post_title: >
+  Finding nodes in Rattus norvegicus
+  pathways with IUPAC names
+author: Egon Willighagen
+post_excerpt: ""
+layout: post
+permalink: >
+  /2014/09/05/finding-nodes-in-rattus-norvegicus-pathways-with-iupac-names/
+---
+<strong>Hypothesis</strong>: Rattus norvegicus pathways in WikiPathways have DataNode’s with labels containing IUPAC names which can be tagged as type Metabolite.
+
+<strong>Start date</strong>: 2014-09-05 <strong>End date</strong>: in progress
+
+<strong>Description</strong>:
+
+WikiPathways entries in GPML have DataNode objects and Label objects. It was found before [<a href="http://onsnetwork.org/chemblaics/2014/08/24/finding-nodes-in-anopheles-gambiae-pathways-with-iupac-names/">here</a>, <a href="http://onsnetwork.org/chemblaics/2014/09/01/finding-nodes-in-homo-sapiens-pathways-with-iupac-names/">here</a>] that metabolites can be encoded in pathways is Label objects and therefore not machine-readable as Metabolite-type DataNode and unable to have a database identifier. As such, these metabolites are unusable for pathway analysis of metabolomics data.
+
+By processing these GPML files (they are XML-based) and iterating over all Label’s we can attempt to convert this label into chemical structure with OPSIN. This goes under the assumption that if <a style="color: #9f9f9f;" href="http://opsin.ch.cam.ac.uk/">OPSIN</a> can parse the label into a structure, it is one. This label will be recorded along with the pathway identifier for manual inspection. For each structure it will also look up a <a style="color: #9f9f9f;" href="http://www.chemspider.com/">ChemSpider</a> identifier.
+
+<strong>Methods</strong>
+
+Unchanged protocol.
+<ul>
+	<li>Download the <a style="color: #9f9f9f;" href="http://wikipathways.org/index.php/Download_Pathways">GPML files from WikiPathways</a></li>
+	<li>Get a working Bioclipse development version (hard) with the OPSIN, InChI, and ChemSpider extensions</li>
+	<li>A Groovy script to iterate over the GPML, find &lt;Label&gt; elementsEach &lt;Label&gt; is parsed with OPSIN and if successful, generate an InChI</li>
+	<li>Use the InChIs to find ChemSpider identifiers</li>
+	<li>Output all as a text file and open metabolites in a Structure table</li>
+</ul>
+<strong>Report </strong>
+
+$DETAILS OF ACTUALLY PERFORMING THINGS
+
+<strong>Conclusion</strong>: $CONCLUSIONS
