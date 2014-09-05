@@ -1,0 +1,44 @@
+---
+post_title: >
+  Finding nodes in Homo sapiens pathways
+  with IUPAC names
+author: Egon Willighagen
+post_excerpt: ""
+layout: post
+permalink: >
+  /2014/09/01/finding-nodes-in-homo-sapiens-pathways-with-iupac-names/
+---
+<strong>Hypothesis</strong>: Homo sapiens pathways in WikiPathways have DataNode's with labels containing IUPAC names which can be tagged as type Metabolite.
+
+<strong>Start date</strong>: 2014-09-01 <strong>End date</strong>: 2014-09-01
+
+<strong>Description</strong>: WikiPathways entries in GPML have DataNode objects and Label objects. It was found before [<a href="http://onsnetwork.org/chemblaics/2014/08/24/finding-nodes-in-anopheles-gambiae-pathways-with-iupac-names/">here</a>] that metabolites can be encoded in pathways is Label objects and therefore not machine-readable as Metabolite-type DataNode and unable to have a database identifier. As such, these metabolites are unusable for pathway analysis of metabolomics data.
+
+By processing these GPML files (they are XML-based) and iterating over all Label's we can attempt to convert this label into chemical structure with OPSIN. This goes under the assumption that if <a href="http://opsin.ch.cam.ac.uk/">OPSIN</a> can parse the label into a structure, it is one. This label will be recorded along with the pathway identifier for manual inspection. For each structure it will also look up a <a href="http://www.chemspider.com/">ChemSpider</a> identifier.
+
+<strong>Methods</strong>
+<ul>
+	<li>Download the <a href="http://wikipathways.org/index.php/Download_Pathways">GPML files from WikiPathways</a></li>
+	<li>Get a working Bioclipse development version (hard) with the OPSIN, InChI, and ChemSpider extensions</li>
+	<li>A Groovy script to iterate over the GPML, find &lt;Label&gt; elements</li>
+	<li>Each &lt;Label&gt; is parsed with OPSIN and if successful, generate an InChI</li>
+	<li>Use the InChIs to find ChemSpider identifiers</li>
+	<li>Output all as a text file and open metabolites in a Structure table</li>
+</ul>
+<strong>Report </strong>
+
+<a href="http://onsnetwork.org/chemblaics/files/metabolitesHuman.png"><img class="alignnone wp-image-82" src="http://onsnetwork.org/chemblaics/files/metabolitesHuman-300x146.png" alt="metabolitesHuman" width="500" height="244" /></a>
+
+Similar to the experiment for Anopheles gambiae only curated pathways were analyzed, some 266 in total, downloaded from WikiPathways.org on August 24. The previous Groovy script was updated to point to the human pathways, but also to output the results in a file, rather than STDOUT. The new script was <a href="http://www.myexperiment.org/workflows/4446.html">uploaded to myExperiment.org</a>.
+
+The script found 42 Labels that are possibly metabolites. The full list was <a href="https://gist.github.com/egonw/34467d95a41cc00cb283">uploaded to Gist</a>. Again, labels were found which could not be linked to a single ChemSpider ID. For example, "5b-Pregnane-3,20-dione" which will results in these ChemSpider search hits: 21427590, 389575, 21232692, 21239075, 21237402. The result file also shows a few labels with new lines.
+
+One metabolite was manually confirmed in <a href="http://www.wikipathways.org/index.php/Pathway:WP1449">WP1449</a>: <span style="color: #333333;">Imidazoquinolin. Interestingly, the Label was visually "connected" with "(anti-viral compounds)" which have a ChEBI identifier and could be converted to a <em>DataNode</em> of type <em>Metabolite</em> too:</span>
+
+<a href="http://onsnetwork.org/chemblaics/files/metabolitesHuman1.png"><img class="size-medium wp-image-83 aligncenter" src="http://onsnetwork.org/chemblaics/files/metabolitesHuman1-300x135.png" alt="metabolitesHuman1" width="300" height="135" /></a>
+
+Most work, however, needs to be done in the Tryptophan metabolism pathway (<a href="http://www.wikipathways.org/index.php/Pathway:WP465">WP465</a>); many metabolites are not properly made machine readable.
+
+<strong>Conclusion</strong>:
+
+Human pathways also include metabolites encoded in GPML &lt;Label&gt; elements, even in the curated subset.
