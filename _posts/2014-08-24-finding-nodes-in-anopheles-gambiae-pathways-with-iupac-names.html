@@ -1,0 +1,53 @@
+---
+post_title: >
+  Finding nodes in Anopheles gambiae
+  pathways with IUPAC names
+author: Egon Willighagen
+post_excerpt: ""
+layout: post
+permalink: >
+  /2014/08/24/finding-nodes-in-anopheles-gambiae-pathways-with-iupac-names/
+---
+<strong>Hypothesis</strong>: Anopheles gambiae pathways in WikiPathways have DataNode's with labels containing IUPAC names which can be tagged as type Metabolite.
+
+<strong>Start date</strong>: 2014-08-24 <strong>End date</strong>: 2014-08-24
+
+<strong>Description</strong>: WikiPathways entries in GPML have DataNode objects and Label objects. It was found before [no published] that metabolites can be encoded in pathways is Label objects and therefore not machine-readable as Metabolite-type DataNode and unable to have a database identifier. As such, these metabolites are unusable for pathway analysis of metabolomics data.
+
+By processing these GPML files (they are XML-based) and iterating over all Label's we can attempt to convert this label into chemical structure with OPSIN. This goes under the assumption that if <a href="http://opsin.ch.cam.ac.uk/">OPSIN</a> can parse the label into a structure, it is one. This label will be recorded along with the pathway identifier for manual inspection. For each structure it will also look up a <a href="http://www.chemspider.com/">ChemSpider</a> identifier.
+
+<strong>Methods</strong>
+<ul>
+	<li>Download the <a href="http://wikipathways.org/index.php/Download_Pathways">GPML files from WikiPathways</a></li>
+	<li>Get a working Bioclipse development version (hard) with the OPSIN, InChI, and ChemSpider extensions</li>
+	<li>A Groovy script to iterate over the GPML, find &lt;Label&gt; elements</li>
+	<li>Each &lt;Label&gt; is parsed with OPSIN and if successful, generate an InChI</li>
+	<li>Use the InChIs to find ChemSpider identifiers</li>
+	<li>Output all as a text file and open metabolites in a Structure table</li>
+</ul>
+<strong>Report </strong>
+
+<a href="http://onsnetwork.org/chemblaics/files/anophelesMetabolites.png"><img class="wp-image-68 size-large alignnone" src="http://onsnetwork.org/chemblaics/files/anophelesMetabolites-1024x516.png" alt="anophelesMetabolites" width="625" height="314" /></a>
+
+Twelve WikiPathways for Anopheles gambiae were downloaded part of the analysis collection. In the future, uncurated pathways can also be included, anticipating to have more metabolites not annotated as Metabolite type. A custom Groovy script for Bioclipse was used, based on a previous <a href="http://www.myexperiment.org/workflows/3700.html">similar script available from myExperiment.org</a>. The updated script has been made <a href="http://www.myexperiment.org/workflows/4439.html">available on myExperiment.org too</a>. The results of running this script are visible in the above screenshot.
+
+Key calls to Bioclipse managers used in this script, in addition to using the Groovy XMLParser, are:
+<ul>
+	<li>cdk.createMoleculeList()</li>
+	<li>opsin.parseIUPACName(name)</li>
+	<li>structureList.add(molecule)</li>
+	<li>inchi.generate(molecule)</li>
+	<li>chemspider.resolve(inchiKey)</li>
+</ul>
+Four metabolites were found, in one pathway (WP1230):
+<blockquote>Ag_One_Carbon_Metabolism_WP1230_68447.gpml: node b93 -&gt; Serine -&gt; MTCFGRXMJLQNBG-UHFFFAOYSA-N -&gt; CSID: [597]
+Ag_One_Carbon_Metabolism_WP1230_68447.gpml: node ff7 -&gt; Glycine -&gt; DHMQDGOQFOQNFH-UHFFFAOYSA-N -&gt; CSID: [730]
+Ag_One_Carbon_Metabolism_WP1230_68447.gpml: node c8c -&gt; Deoxythymidine monophosphate -&gt; WVNRRNJFRREKAR-UHFFFAOYSA-N -&gt; CSID: [315142]
+Ag_One_Carbon_Metabolism_WP1230_68447.gpml: node a47 -&gt; Deoxyuridine monophosphate -&gt; JSRLJPSBLDHEIO-UHFFFAOYSA-N -&gt; CSID: [21537275, 668, 21230588]</blockquote>
+Three metabolites have a single ChemSpider identifier, whereas one has three ChemSpider identifiers.
+
+Visual inspection of <a href="http://www.wikipathways.org/index.php/Pathway:WP1230">WP1230</a> (revision <a href="http://www.wikipathways.org/index.php?title=Pathway:WP1230&amp;oldid=68447">68447</a>) confirms our hypothesis:
+
+<a href="http://onsnetwork.org/chemblaics/files/anophelesMetabolites1.png"><img class="size-medium wp-image-71 aligncenter" src="http://onsnetwork.org/chemblaics/files/anophelesMetabolites1-300x155.png" alt="anophelesMetabolites1" width="300" height="155" /></a>
+
+<strong>Conclusion</strong>: Anopheles gambiae pathways indeed also include metabolites encoded in GPML &lt;Label&gt; elements.
